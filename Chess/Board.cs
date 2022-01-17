@@ -4,14 +4,14 @@ namespace Chess;
 
 public class Board
 {
-    private readonly List<Piece> _pieces = Array.Empty<Piece>()
+    private readonly List<Piece> _pieces = Enumerable.Empty<Piece>()
         .Concat(CreateTeam1(PieceColour.White))
         .Concat(CreateTeam2(PieceColour.Black))
         .ToList();
 
     public Piece? FindPiece(char x, int y)
     {
-        return _pieces.FirstOrDefault(p => p.IsAtLocation(x, y));
+        return _pieces.FirstOrDefault(p => p.Position.Equals(x, y));
     }
 
     public static bool IsBlackTile(char x, int y)

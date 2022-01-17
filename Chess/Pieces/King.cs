@@ -1,17 +1,29 @@
 ﻿namespace Chess.Pieces;
 
-public class King : Piece
+public sealed class King : Piece
 {
     private const PieceType ChessPiece = PieceType.King;
 
-    public King(PieceColour colour)
-        : base(colour, ChessPiece)
-    {
-    }
-    
     public King(PieceColour colour, char x, int y)
         : base(colour, ChessPiece)
     {
-        SetPosition(x, y);
+        Position = new (x, y);
+    }
+    
+    public override IEnumerable<MoveAction> PossibleMoves()
+    {
+        for (var x = (Position.X - 1); x <= (Position.X + 1); x++)
+        for (var y = (Position.Y - 1); y <= (Position.Y + 1); y++)
+        {
+            if (Position.Equals(x, y))
+            {
+                continue;
+            }
+
+            if (Position.IsValid(x, y))
+            {
+                yield return new (x, y);
+            }
+        }
     }
 }

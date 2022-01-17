@@ -1,17 +1,53 @@
 ﻿namespace Chess.Pieces;
 
-public class Bishop : Piece
+public sealed class Bishop : Piece
 {
     private const PieceType ChessPiece = PieceType.Bishop;
 
-    public Bishop(PieceColour colour)
-        : base(colour, ChessPiece)
-    {
-    }
-    
     public Bishop(PieceColour colour, char x, int y)
         : base(colour, ChessPiece)
     {
-        SetPosition(x, y);
+        Position = new (x, y);
+    }
+    
+    public override IEnumerable<MoveAction> PossibleMoves()
+    {
+        var possibilities = new List<MoveAction>();
+
+        for (var x = (Position.X - 1); x >= Position.MinX; x--)
+        {
+            var difference = Position.X - x;
+            var y1 = Position.Y - difference;
+            var y2 = Position.Y + difference;
+            
+            if (y1 >= Position.MinY)
+            {
+                possibilities.Add(new (x, y1));
+            }
+
+            if (y2 >= Position.MinY)
+            {
+                possibilities.Add(new (x, y2));
+            }
+        }
+        
+        for (var x = (Position.X + 1); x <= Position.MaxX; x++)
+        {
+            var difference = x - Position.X;
+            var y1 = Position.Y - difference;
+            var y2 = Position.Y + difference;
+            
+            if (y1 <= Position.MaxX)
+            {
+                possibilities.Add(new (x, y1));
+            }
+
+            if (y2 <= Position.MaxX)
+            {
+                possibilities.Add(new (x, y2));
+            }
+        }
+
+        return possibilities;
     }
 }
