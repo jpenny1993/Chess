@@ -2,8 +2,8 @@
 
 public sealed class Position
 {
-    public const int MinX = 'A';
-    public const int MaxX = 'H';
+    public const char MinX = 'A';
+    public const char MaxX = 'H';
 
     public const int MinY = 1;
     public const int MaxY = 8;

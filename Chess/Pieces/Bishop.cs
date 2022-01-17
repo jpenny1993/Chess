@@ -17,15 +17,15 @@ public sealed class Bishop : Piece
         for (var x = (Position.X - 1); x >= Position.MinX; x--)
         {
             var difference = Position.X - x;
-            var y1 = Position.Y - difference;
-            var y2 = Position.Y + difference;
             
-            if (y1 >= Position.MinY)
+            var y1 = Position.Y - difference;
+            if (Position.IsValidY(y1))
             {
                 possibilities.Add(new (x, y1));
             }
 
-            if (y2 >= Position.MinY)
+            var y2 = Position.Y + difference;
+            if (Position.IsValidY(y2))
             {
                 possibilities.Add(new (x, y2));
             }
@@ -34,15 +34,15 @@ public sealed class Bishop : Piece
         for (var x = (Position.X + 1); x <= Position.MaxX; x++)
         {
             var difference = x - Position.X;
+
             var y1 = Position.Y - difference;
-            var y2 = Position.Y + difference;
-            
-            if (y1 <= Position.MaxX)
+            if (Position.IsValidY(y1))
             {
                 possibilities.Add(new (x, y1));
             }
 
-            if (y2 <= Position.MaxX)
+            var y2 = Position.Y + difference;
+            if (Position.IsValidY(y2))
             {
                 possibilities.Add(new (x, y2));
             }

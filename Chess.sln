@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessConsole", "ChessConsol
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess", "Chess\Chess.csproj", "{746FDD67-6E33-498D-88B5-47E804782069}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.Tests", "Chess.Tests\Chess.Tests.csproj", "{0664DDA9-51DB-4F95-A6B2-4062C53526E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{746FDD67-6E33-498D-88B5-47E804782069}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{746FDD67-6E33-498D-88B5-47E804782069}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{746FDD67-6E33-498D-88B5-47E804782069}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0664DDA9-51DB-4F95-A6B2-4062C53526E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0664DDA9-51DB-4F95-A6B2-4062C53526E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0664DDA9-51DB-4F95-A6B2-4062C53526E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0664DDA9-51DB-4F95-A6B2-4062C53526E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

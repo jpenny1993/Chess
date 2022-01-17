@@ -1,0 +1,56 @@
+﻿using System.Linq;
+using FluentAssertions;
+using Xunit;
+
+namespace Chess.Tests.Pieces;
+
+public class BishopTests
+{
+    [Fact]
+    public void Move_Diagonally_Right()
+    {
+        Board board = new []
+        {
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 8
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 7
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 6
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 5
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 4
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 3
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 2
+            'B', ' ', ' ', ' ', ' ', ' ', ' ', ' '  // 1
+        //   A    B    C    D    E    F    G    H
+        };
+        
+        Board expected = new []
+        {
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'B', // 8
+            ' ', ' ', ' ', ' ', ' ', ' ', 'B', ' ', // 7
+            ' ', ' ', ' ', ' ', ' ', 'B', ' ', ' ', // 6
+            ' ', ' ', ' ', ' ', 'B', ' ', ' ', ' ', // 5
+            ' ', ' ', ' ', 'B', ' ', ' ', ' ', ' ', // 4
+            ' ', ' ', 'B', ' ', ' ', ' ', ' ', ' ', // 3
+            ' ', 'B', ' ', ' ', ' ', ' ', ' ', ' ', // 2
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '  // 1
+        //   A    B    C    D    E    F    G    H
+        };
+
+        ExpectMoveSuggestion(board, expected);
+    }
+
+    private static void ExpectMoveSuggestion(Board initial, Board expected)
+    {
+        var possibleMoves = initial.Pieces
+            .Where(p => p.IsBishop)
+            .SelectMany(b => b.PossibleMoves())
+            .Select(m => $"{m.X}{m.Y}")
+            .ToArray();
+        
+        var expectedMoves = expected.Pieces
+            .Where(p => p.IsBishop)
+            .Select(b => $"{b.Position.X}{b.Position.Y}")
+            .ToArray();
+
+        possibleMoves.Should().BeEquivalentTo(expectedMoves);
+    }
+}
