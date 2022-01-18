@@ -197,4 +197,37 @@ public class BishopTests
 
         possibleMoves.Should().BeEquivalentTo(expectedMoves);
     }
+
+    [Fact]
+    public void Cannot_Take_Friendly_Pieces()
+    {
+        var possibleMoves = new ChessBoardBuilder()
+            .WithWhitePieces(
+            //   A    B    C    D    E    F    G    H
+                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 8
+                ' ', ' ', 'P', ' ', ' ', ' ', 'P', ' ', // 7
+                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 6
+                ' ', ' ', ' ', ' ', 'B', ' ', ' ', ' ', // 5
+                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 4
+                ' ', ' ', 'P', ' ', ' ', ' ', 'P', ' ', // 3
+                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 2
+                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ') // 1
+            .SetBishopAt("E5", PieceColour.White)
+            .BuildPossibleMoves();
+        
+        var expectedMoves = new ChessBoardBuilder()
+            .WithWhitePieces(
+            //   A    B    C    D    E    F    G    H
+                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 8
+                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 7
+                ' ', ' ', ' ', 'B', ' ', 'B', ' ', ' ', // 6
+                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 5
+                ' ', ' ', ' ', 'B', ' ', 'B', ' ', ' ', // 4
+                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 3
+                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 2
+                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ') // 1
+            .BuildCoordinates();
+
+        possibleMoves.Should().BeEquivalentTo(expectedMoves);
+    }
 }

@@ -59,7 +59,7 @@ public sealed class ChessBoardBuilder
     
     public ChessBoardBuilder WithWhitePieces(params char[] tiles)
     {
-        AddPieces(PieceColour.Black, tiles);
+        AddPieces(PieceColour.White, tiles);
         if (_pieces.Count == 1)
         {
             _movingPiece = _pieces.First();
