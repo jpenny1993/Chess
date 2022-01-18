@@ -10,7 +10,7 @@ public sealed class Pawn : Piece
         Position = new (x, y);
     }
     
-    public override IEnumerable<MoveAction> PossibleMoves()
+    public override IEnumerable<MoveAction> PossibleMoves(Board board)
     {
         // TODO: Takes are missing
         var y = Colour == PieceColour.White

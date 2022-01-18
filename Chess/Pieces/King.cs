@@ -10,7 +10,7 @@ public sealed class King : Piece
         Position = new (x, y);
     }
     
-    public override IEnumerable<MoveAction> PossibleMoves()
+    public override IEnumerable<MoveAction> PossibleMoves(Board board)
     {
         for (var x = (Position.X - 1); x <= (Position.X + 1); x++)
         for (var y = (Position.Y - 1); y <= (Position.Y + 1); y++)

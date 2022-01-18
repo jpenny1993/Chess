@@ -28,7 +28,7 @@ public class Piece
         Notation = type == PieceType.Pawn ? string.Empty : ((char)type).ToString();
     }
 
-    public virtual IEnumerable<MoveAction> PossibleMoves()
+    public virtual IEnumerable<MoveAction> PossibleMoves(Board board)
     {
         return Enumerable.Empty<MoveAction>();
     }

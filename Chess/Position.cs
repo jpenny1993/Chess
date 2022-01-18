@@ -64,6 +64,11 @@ public sealed class Position
         return base.Equals(obj);
     }
 
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(X, Y);
+    }
+
     public override string ToString()
     {
         return $"{X}{Y}";
