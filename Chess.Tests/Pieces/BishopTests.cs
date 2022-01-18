@@ -179,7 +179,7 @@ public class BishopTests
                 ' ', ' ', 'P', ' ', ' ', ' ', 'P', ' ', // 3
                 ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 2
                 ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ') // 1
-            .SetBishopAt("E5", PieceColour.White)    
+            .SetBishopAt("E5", PieceColour.White)
             .BuildPossibleMoves();
         
         var expectedMoves = new ChessBoardBuilder()
