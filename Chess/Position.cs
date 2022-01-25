@@ -20,6 +20,11 @@ public sealed class Position
     {
         Set(x, y);
     }
+    
+    public Position(int x, int y)
+        : this((char)x, y)
+    {
+    }
 
     public void Set(Position position)
     {

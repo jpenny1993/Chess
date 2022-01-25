@@ -17,4 +17,9 @@ public class MoveAction
         X = (char)x;
         Y = y;
     }
+
+    public MoveAction(Position position)
+    : this(position.X, position.Y)
+    {
+    }
 }

@@ -19,6 +19,11 @@ public class Board
         _pieces.AddRange(pieces);
     }
     
+    public Piece? FindPiece(Position position)
+    {
+        return _pieces.FirstOrDefault(p => p.Position.Equals(position));
+    }
+    
     public Piece? FindPiece(int x, int y)
     {
         return _pieces.FirstOrDefault(p => p.Position.Equals(x, y));
