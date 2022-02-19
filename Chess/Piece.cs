@@ -72,10 +72,33 @@ public abstract class Piece
     /// Defines all the actually possible moves that a piece can make.
     /// This excludes passing intersecting pieces and moving to positions occupied by the same team. 
     /// </summary>
-    public virtual IEnumerable<IAction> PossibleMoves(Board board) => Enumerable.Empty<IAction>(); // TODO: make abstract
+    public virtual IEnumerable<IAction> PossibleMoves(Board board)
+    {
+        foreach (var path in TheoreticalPaths())
+        foreach (var position in path)
+        {
+            var intersectingPiece = board.FindPiece(position);
+            if (intersectingPiece == null)
+            {
+                // Valid move, the tile is empty
+                yield return new Movement(position.X, position.Y);
+                continue;
+            }
+
+            // Invalid move, can't capture teammates
+            if (IsFriendly(intersectingPiece))
+            {
+                break;
+            }
+            
+            // Valid move, can capture enemies
+            yield return new Capture(position.X, position.Y, intersectingPiece.Type);
+            break;
+        }
+    }
     
     /// <summary>
     /// Defines all possible moves/paths that a piece could make, if the board was currently empty.
     /// </summary>
-    public virtual IEnumerable<IEnumerable<Position>> TheoreticalPaths() => Enumerable.Empty<IEnumerable<Position>>(); // TODO: make abstract
+    public virtual IEnumerable<IEnumerable<Position>> TheoreticalPaths() => Enumerable.Empty<IEnumerable<Position>>();
 }

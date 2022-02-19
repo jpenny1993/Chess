@@ -12,31 +12,6 @@ public sealed class Bishop : Piece
         Position = new(x, y);
     }
 
-    public override IEnumerable<IAction> PossibleMoves(Board board)
-    {
-        foreach (var path in TheoreticalPaths())
-        foreach (var position in path)
-        {
-            var intersectingPiece = board.FindPiece(position);
-            if (intersectingPiece == null)
-            {
-                // Valid move, the tile is empty
-                yield return new Movement(position.X, position.Y);
-                continue;
-            }
-
-            // Invalid move, can't capture teammates
-            if (IsFriendly(intersectingPiece))
-            {
-                break;
-            }
-            
-            // Valid move, can capture enemies
-            yield return new Capture(position.X, position.Y, intersectingPiece.Type);
-            break;
-        }
-    }
-
     public override IEnumerable<IEnumerable<Position>> TheoreticalPaths()
     {
         var path1 = new List<Position>();
