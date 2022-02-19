@@ -1,4 +1,6 @@
-﻿namespace Chess.Pieces;
+﻿using Chess.Actions;
+
+namespace Chess.Pieces;
 
 public sealed class Pawn : Piece
 {
@@ -10,7 +12,7 @@ public sealed class Pawn : Piece
         Position = new (x, y);
     }
     
-    public override IEnumerable<MoveAction> PossibleMoves(Board board)
+    public override IEnumerable<IAction> PossibleMoves(Board board)
     {
         // TODO: Takes are missing
         var y = Colour == PieceColour.White
@@ -21,10 +23,10 @@ public sealed class Pawn : Piece
         {
             return new[]
             {
-                new MoveAction(Position.X, y)
+                new Movement(Position.X, y)
             };
         }
 
-        return Enumerable.Empty<MoveAction>();
+        return Enumerable.Empty<Movement>();
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Chess.Pieces;
+﻿using Chess.Actions;
+
+namespace Chess.Pieces;
 
 public sealed class King : Piece
 {
@@ -10,7 +12,7 @@ public sealed class King : Piece
         Position = new (x, y);
     }
     
-    public override IEnumerable<MoveAction> PossibleMoves(Board board)
+    public override IEnumerable<IAction> PossibleMoves(Board board)
     {
         for (var x = (Position.X - 1); x <= (Position.X + 1); x++)
         for (var y = (Position.Y - 1); y <= (Position.Y + 1); y++)
@@ -22,7 +24,7 @@ public sealed class King : Piece
 
             if (Position.IsValid(x, y))
             {
-                yield return new (x, y);
+                yield return new Movement(x, y);
             }
         }
     }

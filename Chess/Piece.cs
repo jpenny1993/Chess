@@ -1,4 +1,6 @@
-﻿namespace Chess;
+﻿using Chess.Actions;
+
+namespace Chess;
 
 public abstract class Piece
 {
@@ -22,7 +24,7 @@ public abstract class Piece
 
     internal Piece(PieceColour colour, PieceType type)
     {
-        Position = Position.Empty;
+        Position = default;
         Colour = colour;
         Type = type;
         Notation = type == PieceType.Pawn ? string.Empty : ((char)type).ToString();
@@ -33,7 +35,33 @@ public abstract class Piece
     /// regardless of whether there is another piece on that tile,
     /// but should be prevented by any intersecting pieces.
     /// </summary>
-    public virtual bool CanMoveTo(Board board, Position position) => false; // TODO: make abstract
+    public bool CanMoveTo(Board board, Position position)
+    {
+        var pathsContainingDestination = TheoreticalPaths()
+            .Where(path => path.Contains(position));
+        
+        foreach (var path in pathsContainingDestination)
+        foreach (var step in path)
+        {
+            var intersectingPiece = board.FindPiece(step);
+            var isTargetDestination = step.Equals(position);
+
+            if (isTargetDestination)
+            {
+                // Can move to empty spaces or enemy spaces
+                return intersectingPiece == null ||
+                       !IsFriendly(intersectingPiece);
+            }
+
+            // The path has been intersected by the current step
+            if (intersectingPiece != null)
+            {
+                break;
+            }
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// Returns <see langword="true" /> if the colour of the pieces are matching. 
@@ -44,7 +72,7 @@ public abstract class Piece
     /// Defines all the actually possible moves that a piece can make.
     /// This excludes passing intersecting pieces and moving to positions occupied by the same team. 
     /// </summary>
-    public virtual IEnumerable<MoveAction> PossibleMoves(Board board) => Enumerable.Empty<MoveAction>(); // TODO: make abstract
+    public virtual IEnumerable<IAction> PossibleMoves(Board board) => Enumerable.Empty<IAction>(); // TODO: make abstract
     
     /// <summary>
     /// Defines all possible moves/paths that a piece could make, if the board was currently empty.
