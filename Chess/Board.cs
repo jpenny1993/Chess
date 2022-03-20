@@ -1,4 +1,5 @@
-﻿using Chess.Pieces;
+﻿using Chess.Notation;
+using Chess.Pieces;
 
 namespace Chess;
 
@@ -10,15 +11,20 @@ public class Board
 
     public Board()
     {
-        _pieces.AddRange(CreateTeam1(PieceColour.White));
-        _pieces.AddRange(CreateTeam2(PieceColour.Black));
+        _pieces.AddRange(CreateWhiteTeam());
+        _pieces.AddRange(CreateBlackTeam());
     }
 
     public Board(IEnumerable<Piece> pieces)
     {
         _pieces.AddRange(pieces);
     }
-    
+
+    public void ApplyTurn(NotedTurn notedTurn)
+    {
+        // TODO: validate and apply turn movements
+    }
+
     public Piece? FindPiece(Position position)
     {
         return _pieces.FirstOrDefault(p => p.Position.Equals(position));
@@ -37,8 +43,9 @@ public class Board
         return (xIsEven && yIsEven) || (!xIsEven && !yIsEven);
     }
 
-    private static IEnumerable<Piece> CreateTeam1(PieceColour colour)
+    private static IEnumerable<Piece> CreateWhiteTeam()
     {
+        const PieceColour colour = PieceColour.White;
         return new Piece[]
         {
             new Rook(colour, 'A', 1),
@@ -60,8 +67,9 @@ public class Board
         };
     }
 
-    private static IEnumerable<Piece> CreateTeam2(PieceColour colour)
+    private static IEnumerable<Piece> CreateBlackTeam()
     {
+        const PieceColour colour = PieceColour.Black;
         return new Piece[]
         {
             new Pawn(colour, 'A', 7),

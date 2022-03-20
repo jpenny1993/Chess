@@ -4,7 +4,7 @@ namespace ChessConsole;
 
 public sealed class ChessSet
 {
-    private readonly Board _board = new();
+    public Board Board { get; } = new();
 
     public void DrawBoard()
     {
@@ -22,7 +22,7 @@ public sealed class ChessSet
             {
                 var isBlackTile = Board.IsBlackTile(x, y);
                 Console.BackgroundColor = isBlackTile ? ConsoleColor.Black : ConsoleColor.Gray;
-                var piece = _board.FindPiece(x, y);
+                var piece = Board.FindPiece(x, y);
                 if (piece != null)
                 {
                     if (piece.IsBlack)

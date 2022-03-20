@@ -1,4 +1,6 @@
-﻿namespace Chess;
+﻿using System.Text.RegularExpressions;
+
+namespace Chess;
 
 public readonly struct Position
 {
@@ -58,6 +60,14 @@ public readonly struct Position
     
     public static implicit operator string(Position position) => position.ToString();
 
+    public static implicit operator Position(string tileRef)
+    {
+        if (tileRef == null || tileRef.Length is < 2 or > 2 || !char.IsLetter(tileRef[0]) || !char.IsDigit(tileRef[1]))
+            throw new InvalidCastException($"Unexpected cast \"{tileRef}\" to {nameof(Position)}.");
+        
+        return new (tileRef[0], int.Parse(tileRef.Substring(1,1)));
+    }
+    
     public static bool operator ==(Position left, Position right) => left.Equals(right);
 
     public static bool operator !=(Position left, Position right) => !(left == right);

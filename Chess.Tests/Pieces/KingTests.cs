@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using Chess.Tests.Builders;
+using FluentAssertions;
 using Xunit;
 
 namespace Chess.Tests.Pieces;
