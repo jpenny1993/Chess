@@ -10,7 +10,7 @@ public sealed class Queen : Piece
         Position = new (x, y);
     }
 
-    public override IEnumerable<IEnumerable<Position>> TheoreticalPaths()
+    public override IEnumerable<TheoreticalPath> TheoreticalPaths()
     {
         var leftDown = Enumerable
             .Range(0, Math.Min(Position.X - Position.MinX, Position.Y - Position.MinY))
@@ -60,6 +60,6 @@ public sealed class Queen : Piece
             .Select(y => new Position(Position.X, y))
             .ToArray();
         
-        return new[] { leftDown, left, leftUp, up, rightUp, right, rightDown, down };
+        return new TheoreticalPath[] { leftDown, left, leftUp, up, rightUp, right, rightDown, down };
     }
 }

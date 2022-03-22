@@ -10,7 +10,7 @@ public sealed class Rook : Piece
         Position = new (x, y);
     }
 
-    public override IEnumerable<IEnumerable<Position>> TheoreticalPaths()
+    public override IEnumerable<TheoreticalPath> TheoreticalPaths()
     {
         var left = Enumerable
             .Range(0, Position.X - Position.MinX)
@@ -36,6 +36,6 @@ public sealed class Rook : Piece
             .Select(y => new Position(Position.X, y))
             .ToArray();
         
-        return new[] { left, up, right, down };
+        return new TheoreticalPath[] { left, up, right, down };
     }
 }

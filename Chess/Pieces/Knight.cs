@@ -10,7 +10,7 @@ public sealed class Knight : Piece
         Position = new (x, y);
     }
     
-    public override IEnumerable<IEnumerable<Position>> TheoreticalPaths()
+    public override IEnumerable<TheoreticalPath> TheoreticalPaths()
     {
         const int range = 2;
         const int offset = 1;
@@ -20,13 +20,13 @@ public sealed class Knight : Piece
         var y = Position.Y - offset;
         if (Position.IsValid(x, y))
         {
-            yield return new[] { new Position(x, y) };
+            yield return new (x, y);
         }
         
         y = Position.Y + offset;
         if (Position.IsValid(x, y))
         {
-            yield return new[] { new Position(x, y) };
+            yield return new (x, y);
         }
         
         // Up
@@ -34,13 +34,13 @@ public sealed class Knight : Piece
         y = Position.Y + range;
         if (Position.IsValid(x, y))
         {
-            yield return new[] { new Position(x, y) };
+            yield return new (x, y);
         }
         
         x = Position.X + offset;
         if (Position.IsValid(x, y))
         {
-            yield return new[] { new Position(x, y) };
+            yield return new (x, y);
         }
 
         // Right
@@ -48,13 +48,13 @@ public sealed class Knight : Piece
         y = Position.Y + offset;
         if (Position.IsValid(x, y))
         {
-            yield return new[] { new Position(x, y) };
+            yield return new (x, y);
         }
         
         y = Position.Y - offset;
         if (Position.IsValid(x, y))
         {
-            yield return new[] { new Position(x, y) };
+            yield return new (x, y);
         }
 
         // Down
@@ -62,13 +62,13 @@ public sealed class Knight : Piece
         y = Position.Y - range;
         if (Position.IsValid(x, y))
         {
-            yield return new[] { new Position(x, y) };
+            yield return new (x, y);
         }
         
         x = Position.X - offset;
         if (Position.IsValid(x, y))
         {
-            yield return new[] { new Position(x, y) };
+            yield return new (x, y);
         }
     }
 }

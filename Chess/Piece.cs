@@ -43,18 +43,18 @@ public abstract class Piece
         foreach (var path in pathsContainingDestination)
         foreach (var step in path)
         {
-            var intersectingPiece = board.FindPiece(step);
-            var isTargetDestination = step.Equals(position);
-
-            if (isTargetDestination)
+            var movement = GetMovement(board, path, step);
+            if (movement == default)
             {
-                // Can move to empty spaces or enemy spaces
-                return intersectingPiece == null ||
-                       !IsFriendly(intersectingPiece);
+                break;
             }
 
-            // The path has been intersected by the current step
-            if (intersectingPiece != null)
+            if (movement.Destination.Equals(position))
+            {
+                return true;
+            }
+
+            if (movement.IsCapture)
             {
                 break;
             }
@@ -72,39 +72,50 @@ public abstract class Piece
     /// Defines all the actually possible moves that a piece can make.
     /// This excludes passing intersecting pieces and moving to positions occupied by the same team. 
     /// </summary>
-    public virtual IEnumerable<Movement> PossibleMoves(Board board)
+    public IEnumerable<Movement> PossibleMoves(Board board)
     {
         foreach (var path in TheoreticalPaths())
-        foreach (var possiblePosition in path)
+        foreach (var step in path)
         {
-            var intersectingPiece = board.FindPiece(possiblePosition);
-            // TODO: check is edge of the board for pawn promotion
-            // TODO: check sniper rules for castling
-            // TODO: check next move to see if it's check
-            // TODO: check if the current position, moves the player out of check
-            // TODO: enpassant rule for pawns
-            
-            if (intersectingPiece == null)
-            {
-                // Valid move, the tile is empty
-                yield return new (Position, possiblePosition);
-                continue;
-            }
-
-            // Invalid move, can't capture teammates
-            if (IsFriendly(intersectingPiece))
+            var movement = GetMovement(board, path, step);
+            if (movement == default)
             {
                 break;
             }
             
-            // Valid move, can capture enemies
-            yield return new (Position, possiblePosition, new Capture(intersectingPiece.Type));
-            break;
+            yield return movement;
+            if (movement.IsCapture)
+            {
+                break;
+            }
         }
     }
     
     /// <summary>
     /// Defines all possible moves/paths that a piece could make, if the board was currently empty.
     /// </summary>
-    public virtual IEnumerable<IEnumerable<Position>> TheoreticalPaths() => Enumerable.Empty<IEnumerable<Position>>();
+    public virtual IEnumerable<TheoreticalPath> TheoreticalPaths() => Enumerable.Empty<TheoreticalPath>();
+
+    protected virtual Movement? GetMovement(Board board, TheoreticalPath path, Position step)
+    {
+        var intersectingPiece = board.FindPiece(step);
+        // TODO: check sniper rules for castling
+        // TODO: check next move to see if it's check
+        // TODO: check if the current position, moves the player out of check
+            
+        if (intersectingPiece == default)
+        {
+            // Valid move, the tile is empty
+            return new (Position, step);
+        }
+
+        // Invalid move, can't capture teammates
+        if (IsFriendly(intersectingPiece))
+        {
+            return default;
+        }
+            
+        // Valid move, can capture enemies
+        return new (Position, step, new Capture(intersectingPiece.Type));
+    }
 }

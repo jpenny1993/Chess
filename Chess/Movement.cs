@@ -1,3 +1,5 @@
+using Chess.Actions;
+
 namespace Chess;
 
 public sealed class Movement
@@ -21,4 +23,6 @@ public sealed class Movement
         Destination = destination;
         Actions = actions;
     }
+
+    public bool IsCapture => Actions.OfType<Capture>().Any();
 }

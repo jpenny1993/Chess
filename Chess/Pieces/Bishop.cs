@@ -12,7 +12,7 @@ public sealed class Bishop : Piece
         Position = new(x, y);
     }
 
-    public override IEnumerable<IEnumerable<Position>> TheoreticalPaths()
+    public override IEnumerable<TheoreticalPath> TheoreticalPaths()
     {
         var path1 = new List<Position>();
         var path2 = new List<Position>();
@@ -53,7 +53,7 @@ public sealed class Bishop : Piece
             }
         }
 
-        return new[]
+        return new TheoreticalPath[]
         {
             path1,
             path2,

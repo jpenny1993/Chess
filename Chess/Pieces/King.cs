@@ -12,7 +12,7 @@ public sealed class King : Piece
         Position = new (x, y);
     }
     
-    public override IEnumerable<IEnumerable<Position>> TheoreticalPaths()
+    public override IEnumerable<TheoreticalPath> TheoreticalPaths()
     {
         const int moveSpeed = 1;
         for (var x = (Position.X - moveSpeed); x <= (Position.X + moveSpeed); x++)
@@ -25,7 +25,7 @@ public sealed class King : Piece
 
             if (Position.IsValid(x, y))
             {
-                yield return new [] { new Position(x, y) };
+                yield return new (x, y);
             }
         }
     }
