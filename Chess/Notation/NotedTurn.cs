@@ -4,9 +4,9 @@ public sealed class NotedTurn
 {
     public int TurnNumber { get; set; }
 
-    public PlayerTurn WhitePlayerTurn { get; set; } = null!;
+    public NotedPlayerTurn WhitePlayerTurn { get; set; } = null!;
 
-    public PlayerTurn BlackPlayerTurn { get; set; } = null!;
+    public NotedPlayerTurn BlackPlayerTurn { get; set; } = null!;
 
     public override string ToString()
     {

@@ -51,9 +51,9 @@ public sealed class AlgebraicNotationReader
         };
     }
 
-    public PlayerTurn ReadMove(PieceColour colour, string playerMove)
+    public NotedPlayerTurn ReadMove(PieceColour colour, string playerMove)
     {
-        var turn = new PlayerTurn(colour)
+        var turn = new NotedPlayerTurn(colour)
         {
             IsCapture = playerMove.Contains('x', StringComparison.OrdinalIgnoreCase),
             IsCastling = CastlingRegex.IsMatch(playerMove),
@@ -109,7 +109,7 @@ public sealed class AlgebraicNotationReader
         else if (PawnMovementRegex.IsMatch(playerMove))
         {
             const PieceType piece = PieceType.Pawn;
-            PlayerMove movement = !turn.IsCapture
+            NotedPlayerMove movement = !turn.IsCapture
                 ? new (piece, playerMove[..2])
                 : new (piece, playerMove.Substring(2, 2))
                 {

@@ -6,7 +6,7 @@ namespace Chess.Tests.Builders;
 public sealed class PlayerTurnBuilder
 {
     private readonly PieceColour _colour;
-    private PlayerMove[] _moves = Array.Empty<PlayerMove>();
+    private NotedPlayerMove[] _moves = Array.Empty<NotedPlayerMove>();
     
     private bool _isCapture;
     private bool _isCheck;
@@ -53,8 +53,8 @@ public sealed class PlayerTurnBuilder
 
         _moves = new[]
         {
-            new PlayerMove(PieceType.King, kingPos), 
-            new PlayerMove(PieceType.Rook, rookPos)
+            new NotedPlayerMove(PieceType.King, kingPos), 
+            new NotedPlayerMove(PieceType.Rook, rookPos)
         };
 
         return this;
@@ -80,14 +80,14 @@ public sealed class PlayerTurnBuilder
 
     public PlayerTurnBuilder Move(Position moveTo, PieceType piece)
     {
-        _moves = new[] { new PlayerMove(piece, moveTo) };
+        _moves = new[] { new NotedPlayerMove(piece, moveTo) };
         return this;
     }
 
-    public static PlayerTurn Build(PlayerTurnBuilder builder)
+    public static NotedPlayerTurn Build(PlayerTurnBuilder builder)
     {
         var isCastling = builder._moves.Length == 2;
-        var turn = new PlayerTurn(builder._colour)
+        var turn = new NotedPlayerTurn(builder._colour)
         {
             IsCapture = builder._isCapture,
             IsCastling = isCastling,

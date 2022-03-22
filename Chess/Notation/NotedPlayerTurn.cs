@@ -3,19 +3,19 @@ using Chess.Actions;
 
 namespace Chess.Notation;
 
-public sealed class PlayerTurn
+public sealed class NotedPlayerTurn
 {
-    public PlayerTurn(PieceColour colour)
+    public NotedPlayerTurn(PieceColour colour)
     {
         Colour = colour;
-        Moves = new List<PlayerMove>();
+        Moves = new List<NotedPlayerMove>();
     }
     
     public PieceColour Colour { get; }
 
     public PieceType? Promotion { get; set; }
 
-    public IList<PlayerMove> Moves { get; }
+    public IList<NotedPlayerMove> Moves { get; }
     
     public bool IsCapture { get; set; }
     

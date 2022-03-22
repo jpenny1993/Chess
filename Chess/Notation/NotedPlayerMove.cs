@@ -1,8 +1,8 @@
 namespace Chess.Notation;
 
-public sealed class PlayerMove
+public sealed class NotedPlayerMove
 {
-    public PlayerMove(PieceType piece, Position moveTo)
+    public NotedPlayerMove(PieceType piece, Position moveTo)
     {
         Piece = piece;
         MoveTo = moveTo;
