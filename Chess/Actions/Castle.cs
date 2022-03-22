@@ -2,4 +2,5 @@
 
 public sealed class Castle : IAction
 {
+    public bool IsKingSide { get; set; }
 }
