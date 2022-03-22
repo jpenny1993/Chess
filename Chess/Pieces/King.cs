@@ -14,8 +14,9 @@ public sealed class King : Piece
     
     public override IEnumerable<IEnumerable<Position>> TheoreticalPaths()
     {
-        for (var x = (Position.X - 1); x <= (Position.X + 1); x++)
-        for (var y = (Position.Y - 1); y <= (Position.Y + 1); y++)
+        const int moveSpeed = 1;
+        for (var x = (Position.X - moveSpeed); x <= (Position.X + moveSpeed); x++)
+        for (var y = (Position.Y - moveSpeed); y <= (Position.Y + moveSpeed); y++)
         {
             if (Position.Equals(x, y))
             {
