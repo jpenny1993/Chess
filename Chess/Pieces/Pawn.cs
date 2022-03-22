@@ -14,9 +14,12 @@ public sealed class Pawn : Piece
     
     public override IEnumerable<IEnumerable<Position>> TheoreticalPaths()
     {
+        const int moveSpeed = 1;
+        const int moveSpeedAtStart = 2;
         var x = Position.X;
-        var y = IsWhite ? Position.Y + 1 : Position.Y - 1;
-        var y2 = IsWhite ? Position.Y + 2 : Position.Y - 2;
+        var y = IsWhite ? Position.Y + moveSpeed : Position.Y - moveSpeed;
+        var y2 = IsWhite ? Position.Y + moveSpeedAtStart : Position.Y - moveSpeedAtStart;
+        var startingRowNumber = IsWhite ? 2 : 7;
         
         // Default move
         if (Position.IsValid(x, y))
@@ -25,7 +28,7 @@ public sealed class Pawn : Piece
         }
 
         // Starting position only move
-        if (IsWhite && Position.Y == 2 || IsBlack && Position.Y == 7)
+        if (Position.Y == startingRowNumber)
         {
             yield return new[]
             {
@@ -35,13 +38,13 @@ public sealed class Pawn : Piece
         }
 
         // Captures
-        var xLeft = x - 1;
+        var xLeft = x - moveSpeed;
         if (Position.IsValid(xLeft, y2))
         {
             yield return new[] { new Position(xLeft, y2) };
         }
         
-        var xRight = x + 1;
+        var xRight = x + moveSpeed;
         if (Position.IsValid(xRight, y2))
         {
             yield return new[] { new Position(xRight, y2) };
