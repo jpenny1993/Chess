@@ -2,16 +2,16 @@ namespace Chess.Notation;
 
 public sealed class NotedPlayerMove
 {
-    public NotedPlayerMove(PieceType piece, Position moveTo)
+    public NotedPlayerMove(PieceType piece, Position destination)
     {
         Piece = piece;
-        MoveTo = moveTo;
+        Destination = destination;
         Hint = string.Empty;
     }
 
     public PieceType Piece { get; set; }
 
-    public Position MoveTo { get; set; }
+    public Position Destination { get; set; }
 
     public string Hint { get; set; }
 }

@@ -1,4 +1,5 @@
-﻿using Chess.Notation;
+﻿using Chess.Actions;
+using Chess.Notation;
 using Chess.Pieces;
 
 namespace Chess;
@@ -20,9 +21,12 @@ public class Board
         _pieces.AddRange(pieces);
     }
 
-    public void ApplyTurn(NotedTurn notedTurn)
+    public void ApplyTurn(NotedTurn turn)
     {
         // TODO: validate and apply turn movements
+        var whitePlayerMove = ConvertNotedPlayerTurnToMovement(turn.WhitePlayerTurn);
+
+        var blackPlayerMove = ConvertNotedPlayerTurnToMovement(turn.BlackPlayerTurn);
     }
 
     public Piece? FindPiece(Position position)
@@ -33,6 +37,65 @@ public class Board
     public Piece? FindPiece(int x, int y)
     {
         return _pieces.FirstOrDefault(p => p.Position.Equals(x, y));
+    }
+    
+    public Piece? FindPiece(PieceColour colour, PieceType pieceType, string? hint, Position destination)
+    {
+        // ReSharper disable once ReplaceWithSingleCallToSingleOrDefault
+        return _pieces
+            .Where(p => p.Colour == colour)
+            .Where(p => p.Type == pieceType)
+            .Where(p => p.Position.Contains(hint))
+            .Where(p => p.CanMoveTo(this, destination)) // This is going to overlap for 3 pawns on start if you don't specify captures
+            .SingleOrDefault(); // Expect only one
+    }
+
+    private Movement? ConvertNotedPlayerTurnToMovement(NotedPlayerTurn turn)
+    {
+        if (turn?.Moves == default || turn.Moves.Count == 0)
+        {
+            return default;
+        }
+
+        var playerMove = turn.Moves.First();
+        var playerOriginPiece = FindPiece(turn.Colour, playerMove.Piece, playerMove.Hint, playerMove.Destination);
+        if (playerOriginPiece == default)
+        {
+            throw new ApplicationException("Unable to find piece to move.");
+        }
+
+        var actions = new List<IAction>();
+
+        if (turn.IsCapture)
+        {
+            var intersectingPiece = FindPiece(playerMove.Destination);
+            if (intersectingPiece == default)
+            {
+                throw new ApplicationException("Expected capture but piece is missing.");
+            }
+
+            actions.Add(new Capture(intersectingPiece.Type));
+        }
+
+        if (turn.IsCheck)
+        {
+            actions.Add(new Check());
+        }
+        else if (turn.IsCheckmate)
+        {
+            actions.Add(new Checkmate());
+        }
+
+        if (turn.Promotion != default)
+        {
+            actions.Add(new Promotion(turn.Promotion.Value));
+        }
+        else if (turn.IsCastling)
+        {
+            actions.Add(new Castle(turn.IsKingSide));
+        }
+
+        return new (playerOriginPiece.Position, playerMove.Destination, actions);
     }
 
     public static bool IsBlackTile(int x, int y)

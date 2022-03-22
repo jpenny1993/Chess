@@ -55,7 +55,7 @@ public sealed class NotedPlayerTurn
 
         if (firstMove != default)
         {
-            sb.Append(firstMove.MoveTo);
+            sb.Append(firstMove.Destination);
         }
 
         if (IsCheck)

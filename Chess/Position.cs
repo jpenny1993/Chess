@@ -42,6 +42,19 @@ public readonly struct Position
         Y = position.Y;
     }
 
+    public bool Contains(string? hint)
+    {
+        // If hint is empty then it should be assumed any result is valid
+        if (string.IsNullOrWhiteSpace(hint))
+        {
+            return true;
+        }
+
+        var uppercaseHint = hint.ToUpperInvariant();
+        return uppercaseHint.Contains(X) ||
+               uppercaseHint.Contains(Y.ToString());
+    }
+
     public bool Equals(Position position) => Y == position.Y && X == position.X;
 
     public bool Equals(int x, int y) => Y == y && X == Upper((char)x);
