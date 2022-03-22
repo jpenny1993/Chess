@@ -19,7 +19,6 @@ public sealed class Pawn : Piece
         var x = Position.X;
         var y = IsWhite ? Position.Y + moveSpeed : Position.Y - moveSpeed;
         var y2 = IsWhite ? Position.Y + moveSpeedAtStart : Position.Y - moveSpeedAtStart;
-        var startingRowNumber = IsWhite ? 2 : 7;
         
         // Default move
         if (Position.IsValid(x, y))
@@ -28,6 +27,7 @@ public sealed class Pawn : Piece
         }
 
         // Starting position only move
+        var startingRowNumber = IsWhite ? 2 : 7;
         if (Position.Y == startingRowNumber)
         {
             yield return new[]
