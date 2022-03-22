@@ -9,8 +9,7 @@ public sealed class Queen : Piece
     {
         Position = new (x, y);
     }
-    
-    
+
     public override IEnumerable<IEnumerable<Position>> TheoreticalPaths()
     {
         var leftDown = Enumerable
