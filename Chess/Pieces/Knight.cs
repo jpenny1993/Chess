@@ -9,4 +9,66 @@ public sealed class Knight : Piece
     {
         Position = new (x, y);
     }
+    
+    public override IEnumerable<IEnumerable<Position>> TheoreticalPaths()
+    {
+        const int range = 2;
+        const int offset = 1;
+
+        // Left
+        var x = Position.X - range;
+        var y = Position.Y - offset;
+        if (Position.IsValid(x, y))
+        {
+            yield return new[] { new Position(x, y) };
+        }
+        
+        y = Position.Y + offset;
+        if (Position.IsValid(x, y))
+        {
+            yield return new[] { new Position(x, y) };
+        }
+        
+        // Up
+        x = Position.X - offset;
+        y = Position.Y + range;
+        if (Position.IsValid(x, y))
+        {
+            yield return new[] { new Position(x, y) };
+        }
+        
+        x = Position.X + offset;
+        if (Position.IsValid(x, y))
+        {
+            yield return new[] { new Position(x, y) };
+        }
+
+        // Right
+        x = Position.X + range;
+        y = Position.Y + offset;
+        if (Position.IsValid(x, y))
+        {
+            yield return new[] { new Position(x, y) };
+        }
+        
+        y = Position.Y - offset;
+        if (Position.IsValid(x, y))
+        {
+            yield return new[] { new Position(x, y) };
+        }
+
+        // Down
+        x = Position.X + offset;
+        y = Position.Y - range;
+        if (Position.IsValid(x, y))
+        {
+            yield return new[] { new Position(x, y) };
+        }
+        
+        x = Position.X - offset;
+        if (Position.IsValid(x, y))
+        {
+            yield return new[] { new Position(x, y) };
+        }
+    }
 }
