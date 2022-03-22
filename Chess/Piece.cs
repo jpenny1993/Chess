@@ -72,16 +72,22 @@ public abstract class Piece
     /// Defines all the actually possible moves that a piece can make.
     /// This excludes passing intersecting pieces and moving to positions occupied by the same team. 
     /// </summary>
-    public virtual IEnumerable<IAction> PossibleMoves(Board board)
+    public virtual IEnumerable<Movement> PossibleMoves(Board board)
     {
         foreach (var path in TheoreticalPaths())
-        foreach (var position in path)
+        foreach (var possiblePosition in path)
         {
-            var intersectingPiece = board.FindPiece(position);
+            var intersectingPiece = board.FindPiece(possiblePosition);
+            // TODO: check is edge of the board for pawn promotion
+            // TODO: check sniper rules for castling
+            // TODO: check next move to see if it's check
+            // TODO: check if the current position, moves the player out of check
+            // TODO: enpassant rule for pawns
+            
             if (intersectingPiece == null)
             {
                 // Valid move, the tile is empty
-                yield return new Movement(position.X, position.Y);
+                yield return new (Position, possiblePosition);
                 continue;
             }
 
@@ -92,7 +98,7 @@ public abstract class Piece
             }
             
             // Valid move, can capture enemies
-            yield return new Capture(position.X, position.Y, intersectingPiece.Type);
+            yield return new (Position, possiblePosition, new Capture(intersectingPiece.Type));
             break;
         }
     }

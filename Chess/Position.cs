@@ -65,7 +65,7 @@ public readonly struct Position
         if (tileRef == null || tileRef.Length is < 2 or > 2 || !char.IsLetter(tileRef[0]) || !char.IsDigit(tileRef[1]))
             throw new InvalidCastException($"Unexpected cast \"{tileRef}\" to {nameof(Position)}.");
         
-        return new (tileRef[0], int.Parse(tileRef.Substring(1,1)));
+        return new (tileRef[0], int.Parse(tileRef.Substring(1, 1)));
     }
     
     public static bool operator ==(Position left, Position right) => left.Equals(right);

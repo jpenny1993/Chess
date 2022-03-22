@@ -86,9 +86,9 @@ public sealed class ChessBoardBuilder
     {
         return _movingPiece
             .PossibleMoves(Build())
-            .OrderBy(m => m.Position.X)
-            .ThenBy(m => m.Position.Y)
-            .Select(m => m.Position.ToString())
+            .OrderBy(m => m.Destination.X)
+            .ThenBy(m => m.Destination.Y)
+            .Select(m => m.Destination.ToString())
             .ToArray();
     }
     

@@ -12,21 +12,39 @@ public sealed class Pawn : Piece
         Position = new (x, y);
     }
     
-    public override IEnumerable<IAction> PossibleMoves(Board board)
+    public override IEnumerable<IEnumerable<Position>> TheoreticalPaths()
     {
-        // TODO: Takes are missing
-        var y = Colour == PieceColour.White
-            ? (Position.Y + 1)
-            : (Position.Y - 1);
-
-        if (Position.IsValid(Position.X, y))
+        var x = Position.X;
+        var y = IsWhite ? Position.Y + 1 : Position.Y - 1;
+        var y2 = IsWhite ? Position.Y + 2 : Position.Y - 2;
+        
+        // Default move
+        if (Position.IsValid(x, y))
         {
-            return new[]
+            yield return new[] { new Position(x, y) };
+        }
+
+        // Starting position only move
+        if (IsWhite && Position.Y == 2 || IsBlack && Position.Y == 7)
+        {
+            yield return new[]
             {
-                new Movement(Position.X, y)
+                new Position(x, y),
+                new Position(x, y2)
             };
         }
 
-        return Enumerable.Empty<Movement>();
+        // Captures
+        var xLeft = x - 1;
+        if (Position.IsValid(xLeft, y2))
+        {
+            yield return new[] { new Position(xLeft, y2) };
+        }
+        
+        var xRight = x + 1;
+        if (Position.IsValid(xRight, y2))
+        {
+            yield return new[] { new Position(xRight, y2) };
+        }
     }
 }
