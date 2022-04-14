@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Chess.Exceptions;
 
 namespace Chess.Notation;
 
@@ -21,6 +22,11 @@ public sealed class AlgebraicNotationReader
     private static readonly Regex CastlingRegex = new (AlgebraicPlayerMoveNotation.Castling);
     private static readonly Regex NonPawnMovementRegex = new (AlgebraicPlayerMoveNotation.NonPawnMovement);
     private static readonly Regex PawnMovementRegex = new (AlgebraicPlayerMoveNotation.PawnMovement);
+    
+    private static readonly char[] CaptureAndCheckChars = new[] { 'x', 'X', '+', '#' };
+    private static readonly char[] CastleChars = new[] { 'O', 'o', '0' };
+
+    private int TurnNumber { get; set; }
 
     public NotedTurn ReadTurn(string chessTurn)
     {
@@ -28,30 +34,40 @@ public sealed class AlgebraicNotationReader
 
         if (!match.Success)
         {
-            throw new ApplicationException("Not valid chess turn.");
+            throw AlgebraicNotationException.InvalidTurn;
         }
 
-        var moveNoGroup = match.Groups["turn"]; // TODO: handle no round numbers using auto incrementing number
-        
+        var moveNoGroup = match.Groups["turn"];
+        var turnNumber = moveNoGroup.Success
+            ? (int.TryParse(moveNoGroup.Value, out var value) ? value : 0)
+            : 0;
+
+        if (turnNumber != ++TurnNumber) // Unable to parse number, or not matching auto increment
+        {
+            turnNumber = TurnNumber;
+        }
+
         var whiteMoveGroup = match.Groups["white"];
         var whiteMove = whiteMoveGroup.Success
-            ? ReadMove(PieceColour.White, whiteMoveGroup.Value)
-            : throw new ApplicationException("Not valid white move");
+            ? ReadPlayerTurn(PieceColour.White, whiteMoveGroup.Value)
+            : throw AlgebraicNotationException.InvalidWhitePlayerMove;
         
         var blackMoveGroup = match.Groups["black"];
         var blackMove = blackMoveGroup.Success
-            ? ReadMove(PieceColour.Black, blackMoveGroup.Value)
-            : new (PieceColour.Black); // TODO: Only valid if checkmate
+            ? ReadPlayerTurn(PieceColour.Black, blackMoveGroup.Value)
+            : whiteMove.IsCheckmate
+                ? new(PieceColour.Black)
+                : throw AlgebraicNotationException.InvalidBlackPlayerMove; 
 
         return new()
         {
-            TurnNumber = int.Parse(moveNoGroup.Value),
+            TurnNumber = turnNumber,
             WhitePlayerTurn = whiteMove,
             BlackPlayerTurn = blackMove
         };
     }
 
-    public NotedPlayerTurn ReadMove(PieceColour colour, string playerMove)
+    private static NotedPlayerTurn ReadPlayerTurn(PieceColour colour, string playerMove)
     {
         var turn = new NotedPlayerTurn(colour)
         {
@@ -63,7 +79,7 @@ public sealed class AlgebraicNotationReader
 
         if (turn.IsCastling)
         {
-            var count = playerMove.Count(c => new[] { 'O', 'o', '0' }.Contains(c));
+            var count = playerMove.Count(c => CastleChars.Contains(c));
             turn.IsKingSide = count == 2;
             var isWhite = colour == PieceColour.White;
 
@@ -71,13 +87,13 @@ public sealed class AlgebraicNotationReader
             var kingX = turn.IsKingSide ? 'G' : 'C';
             var rookX = turn.IsKingSide ? 'F' : 'D';
 
-            turn.Moves.Add(new (PieceType.King, new Position(kingX, y)));
-            turn.Moves.Add(new (PieceType.Rook, new Position(rookX, y)));
+            turn.Moves.Add(new (PieceType.King, new(kingX, y)));
+            turn.Moves.Add(new (PieceType.Rook, new(rookX, y)));
         }
         else if (NonPawnMovementRegex.IsMatch(playerMove))
         {
             var piece = (PieceType)playerMove[0];
-            var parts = playerMove[1..].Split(new[]{ 'x', 'X', '+', '#' }, StringSplitOptions.RemoveEmptyEntries);
+            var parts = playerMove[1..].Split(CaptureAndCheckChars, StringSplitOptions.RemoveEmptyEntries);
             string hint;
             string position;
 
@@ -98,7 +114,7 @@ public sealed class AlgebraicNotationReader
             }
             else
             {
-                throw new ApplicationException("Unable to parse move to position");
+                throw AlgebraicNotationException.InvalidPosition;
             }
 
             turn.Moves.Add(new (piece, position)
@@ -111,7 +127,7 @@ public sealed class AlgebraicNotationReader
             const PieceType piece = PieceType.Pawn;
             NotedPlayerMove movement = !turn.IsCapture
                 ? new (piece, playerMove[..2])
-                : new (piece, playerMove.Substring(2, 2))
+                : new (piece, playerMove[2..4])
                 {
                     Hint = playerMove[..1].ToUpperInvariant()
                 };
