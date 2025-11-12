@@ -1,3 +1,4 @@
+using Chess.Exceptions;
 using Chess.Notation;
 using Chess.Tests.Builders;
 using FluentAssertions;
@@ -88,5 +89,454 @@ public class NotationTests
 
             actualTurn.Should().BeEquivalentTo(expectedTurn);
         }
+    }
+
+    [Fact]
+    public void Should_Parse_Simple_Pawn_Move()
+    {
+        var notation = "1.e4e5";
+        var reader = new AlgebraicNotationReader();
+        var turn = reader.ReadTurn(notation);
+
+        turn.TurnNumber.Should().Be(1);
+        turn.WhitePlayerTurn.Moves.Should().HaveCount(1);
+        turn.WhitePlayerTurn.Moves[0].Piece.Should().Be(PieceType.Pawn);
+        turn.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("E4");
+
+        turn.BlackPlayerTurn.Moves.Should().HaveCount(1);
+        turn.BlackPlayerTurn.Moves[0].Piece.Should().Be(PieceType.Pawn);
+        turn.BlackPlayerTurn.Moves[0].Destination.ToString().Should().Be("E5");
+    }
+
+    [Fact]
+    public void Should_Parse_Knight_Move()
+    {
+        var notation = "1.Nf3Nc6";
+        var reader = new AlgebraicNotationReader();
+        var turn = reader.ReadTurn(notation);
+
+        turn.WhitePlayerTurn.Moves[0].Piece.Should().Be(PieceType.Knight);
+        turn.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("F3");
+
+        turn.BlackPlayerTurn.Moves[0].Piece.Should().Be(PieceType.Knight);
+        turn.BlackPlayerTurn.Moves[0].Destination.ToString().Should().Be("C6");
+    }
+
+    [Fact]
+    public void Should_Parse_Capture()
+    {
+        var notation = "1.exd5Nxd5";
+        var reader = new AlgebraicNotationReader();
+        var turn = reader.ReadTurn(notation);
+
+        turn.WhitePlayerTurn.IsCapture.Should().BeTrue();
+        turn.WhitePlayerTurn.Moves[0].Piece.Should().Be(PieceType.Pawn);
+        turn.WhitePlayerTurn.Moves[0].Hint.Should().Be("E");
+        turn.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("D5");
+
+        turn.BlackPlayerTurn.IsCapture.Should().BeTrue();
+        turn.BlackPlayerTurn.Moves[0].Piece.Should().Be(PieceType.Knight);
+        turn.BlackPlayerTurn.Moves[0].Destination.ToString().Should().Be("D5");
+    }
+
+    [Fact]
+    public void Should_Parse_Check()
+    {
+        var notation = "1.Qh5+Nf6";
+        var reader = new AlgebraicNotationReader();
+        var turn = reader.ReadTurn(notation);
+
+        turn.WhitePlayerTurn.IsCheck.Should().BeTrue();
+        turn.WhitePlayerTurn.Moves[0].Piece.Should().Be(PieceType.Queen);
+        turn.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("H5");
+    }
+
+    [Fact]
+    public void Should_Parse_Checkmate()
+    {
+        var reader = new AlgebraicNotationReader();
+
+        var turn1 = reader.ReadTurn("1.Qh5+g6");
+        turn1.WhitePlayerTurn.IsCheck.Should().BeTrue();
+
+        var turn2 = reader.ReadTurn("2.Qxf7#");
+        turn2.WhitePlayerTurn.IsCheckmate.Should().BeTrue();
+        turn2.WhitePlayerTurn.IsCapture.Should().BeTrue();
+        turn2.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("F7");
+    }
+
+    [Fact]
+    public void Should_Parse_Kingside_Castling()
+    {
+        var notation = "10.O-OO-O";
+        var reader = new AlgebraicNotationReader();
+        var turn = reader.ReadTurn(notation);
+
+        turn.WhitePlayerTurn.IsCastling.Should().BeTrue();
+        turn.WhitePlayerTurn.IsKingSide.Should().BeTrue();
+        turn.WhitePlayerTurn.Moves.Should().HaveCount(2);
+        turn.WhitePlayerTurn.Moves[0].Piece.Should().Be(PieceType.King);
+        turn.WhitePlayerTurn.Moves[1].Piece.Should().Be(PieceType.Rook);
+
+        turn.BlackPlayerTurn.IsCastling.Should().BeTrue();
+        turn.BlackPlayerTurn.IsKingSide.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Should_Parse_Queenside_Castling()
+    {
+        var notation = "10.O-O-OO-O-O";
+        var reader = new AlgebraicNotationReader();
+        var turn = reader.ReadTurn(notation);
+
+        turn.WhitePlayerTurn.IsCastling.Should().BeTrue();
+        turn.WhitePlayerTurn.IsKingSide.Should().BeFalse();
+        turn.WhitePlayerTurn.Moves.Should().HaveCount(2);
+        turn.WhitePlayerTurn.Moves[0].Piece.Should().Be(PieceType.King);
+        turn.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("C1");
+        turn.WhitePlayerTurn.Moves[1].Piece.Should().Be(PieceType.Rook);
+        turn.WhitePlayerTurn.Moves[1].Destination.ToString().Should().Be("D1");
+
+        turn.BlackPlayerTurn.IsCastling.Should().BeTrue();
+        turn.BlackPlayerTurn.IsKingSide.Should().BeFalse();
+        turn.BlackPlayerTurn.Moves[0].Destination.ToString().Should().Be("C8");
+    }
+
+    [Fact]
+    public void Should_Parse_Pawn_Promotion()
+    {
+        var notation = "1.e8=Qd1=N";
+        var reader = new AlgebraicNotationReader();
+        var turn = reader.ReadTurn(notation);
+
+        turn.WhitePlayerTurn.Moves[0].Piece.Should().Be(PieceType.Pawn);
+        turn.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("E8");
+        turn.WhitePlayerTurn.Promotion.Should().Be(PieceType.Queen);
+
+        turn.BlackPlayerTurn.Moves[0].Piece.Should().Be(PieceType.Pawn);
+        turn.BlackPlayerTurn.Moves[0].Destination.ToString().Should().Be("D1");
+        turn.BlackPlayerTurn.Promotion.Should().Be(PieceType.Knight);
+    }
+
+    [Fact]
+    public void Should_Parse_Ambiguous_Knight_Move_With_File_Hint()
+    {
+        var notation = "1.Nbd2Nbd7";
+        var reader = new AlgebraicNotationReader();
+        var turn = reader.ReadTurn(notation);
+
+        turn.WhitePlayerTurn.Moves[0].Piece.Should().Be(PieceType.Knight);
+        turn.WhitePlayerTurn.Moves[0].Hint.Should().Be("B");
+        turn.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("D2");
+
+        turn.BlackPlayerTurn.Moves[0].Piece.Should().Be(PieceType.Knight);
+        turn.BlackPlayerTurn.Moves[0].Hint.Should().Be("B");
+        turn.BlackPlayerTurn.Moves[0].Destination.ToString().Should().Be("D7");
+    }
+
+    [Fact]
+    public void Should_Parse_Ambiguous_Rook_Move_With_Rank_Hint()
+    {
+        var notation = "1.R1a3R8d7";
+        var reader = new AlgebraicNotationReader();
+        var turn = reader.ReadTurn(notation);
+
+        turn.WhitePlayerTurn.Moves[0].Piece.Should().Be(PieceType.Rook);
+        turn.WhitePlayerTurn.Moves[0].Hint.Should().Be("1");
+        turn.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("A3");
+
+        turn.BlackPlayerTurn.Moves[0].Piece.Should().Be(PieceType.Rook);
+        turn.BlackPlayerTurn.Moves[0].Hint.Should().Be("8");
+        turn.BlackPlayerTurn.Moves[0].Destination.ToString().Should().Be("D7");
+    }
+
+    [Fact]
+    public void Should_Parse_Bishop_Move()
+    {
+        var notation = "1.Bc4Bb4";
+        var reader = new AlgebraicNotationReader();
+        var turn = reader.ReadTurn(notation);
+
+        turn.WhitePlayerTurn.Moves[0].Piece.Should().Be(PieceType.Bishop);
+        turn.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("C4");
+
+        turn.BlackPlayerTurn.Moves[0].Piece.Should().Be(PieceType.Bishop);
+        turn.BlackPlayerTurn.Moves[0].Destination.ToString().Should().Be("B4");
+    }
+
+    [Fact]
+    public void Should_Parse_Queen_Move()
+    {
+        var notation = "1.Qd4Qe7";
+        var reader = new AlgebraicNotationReader();
+        var turn = reader.ReadTurn(notation);
+
+        turn.WhitePlayerTurn.Moves[0].Piece.Should().Be(PieceType.Queen);
+        turn.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("D4");
+
+        turn.BlackPlayerTurn.Moves[0].Piece.Should().Be(PieceType.Queen);
+        turn.BlackPlayerTurn.Moves[0].Destination.ToString().Should().Be("E7");
+    }
+
+    [Fact]
+    public void Should_Parse_King_Move()
+    {
+        var notation = "1.Ke2Ke7";
+        var reader = new AlgebraicNotationReader();
+        var turn = reader.ReadTurn(notation);
+
+        turn.WhitePlayerTurn.Moves[0].Piece.Should().Be(PieceType.King);
+        turn.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("E2");
+
+        turn.BlackPlayerTurn.Moves[0].Piece.Should().Be(PieceType.King);
+        turn.BlackPlayerTurn.Moves[0].Destination.ToString().Should().Be("E7");
+    }
+
+    [Fact]
+    public void Should_Parse_Rook_Move()
+    {
+        var notation = "1.Ra1Rh8";
+        var reader = new AlgebraicNotationReader();
+        var turn = reader.ReadTurn(notation);
+
+        turn.WhitePlayerTurn.Moves[0].Piece.Should().Be(PieceType.Rook);
+        turn.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("A1");
+
+        turn.BlackPlayerTurn.Moves[0].Piece.Should().Be(PieceType.Rook);
+        turn.BlackPlayerTurn.Moves[0].Destination.ToString().Should().Be("H8");
+    }
+
+    [Fact]
+    public void Should_Parse_Capture_With_Check()
+    {
+        var notation = "1.Qxf7+Kd8";
+        var reader = new AlgebraicNotationReader();
+        var turn = reader.ReadTurn(notation);
+
+        turn.WhitePlayerTurn.IsCapture.Should().BeTrue();
+        turn.WhitePlayerTurn.IsCheck.Should().BeTrue();
+        turn.WhitePlayerTurn.Moves[0].Piece.Should().Be(PieceType.Queen);
+        turn.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("F7");
+    }
+
+    [Fact]
+    public void Should_Parse_Sequential_Turns()
+    {
+        var reader = new AlgebraicNotationReader();
+
+        var turn1 = reader.ReadTurn("1.e4e5");
+        var turn2 = reader.ReadTurn("2.Nf3Nc6");
+        var turn3 = reader.ReadTurn("3.Bc4Bc5");
+
+        turn1.TurnNumber.Should().Be(1);
+        turn2.TurnNumber.Should().Be(2);
+        turn3.TurnNumber.Should().Be(3);
+
+        turn1.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("E4");
+        turn2.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("F3");
+        turn3.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("C4");
+    }
+
+    [Fact]
+    public void Should_Parse_Pawn_Promotion_With_Capture()
+    {
+        var notation = "1.exd8=Qaxb1=R";
+        var reader = new AlgebraicNotationReader();
+        var turn = reader.ReadTurn(notation);
+
+        turn.WhitePlayerTurn.IsCapture.Should().BeTrue();
+        turn.WhitePlayerTurn.Moves[0].Piece.Should().Be(PieceType.Pawn);
+        turn.WhitePlayerTurn.Moves[0].Hint.Should().Be("E");
+        turn.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("D8");
+        turn.WhitePlayerTurn.Promotion.Should().Be(PieceType.Queen);
+
+        turn.BlackPlayerTurn.IsCapture.Should().BeTrue();
+        turn.BlackPlayerTurn.Moves[0].Piece.Should().Be(PieceType.Pawn);
+        turn.BlackPlayerTurn.Moves[0].Hint.Should().Be("A");
+        turn.BlackPlayerTurn.Moves[0].Destination.ToString().Should().Be("B1");
+        turn.BlackPlayerTurn.Promotion.Should().Be(PieceType.Rook);
+    }
+
+    [Fact]
+    public void Should_Handle_Notation_Without_Move_Numbers()
+    {
+        var notation = "e4e5";
+        var reader = new AlgebraicNotationReader();
+        var turn = reader.ReadTurn(notation);
+
+        turn.TurnNumber.Should().Be(1);
+        turn.WhitePlayerTurn.Moves[0].Destination.ToString().Should().Be("E4");
+        turn.BlackPlayerTurn.Moves[0].Destination.ToString().Should().Be("E5");
+    }
+
+    [Fact]
+    public void Should_Parse_Alternative_Castling_Notation_With_Zeros()
+    {
+        var notation = "10.0-00-0-0";
+        var reader = new AlgebraicNotationReader();
+        var turn = reader.ReadTurn(notation);
+
+        turn.WhitePlayerTurn.IsCastling.Should().BeTrue();
+        turn.WhitePlayerTurn.IsKingSide.Should().BeTrue();
+
+        turn.BlackPlayerTurn.IsCastling.Should().BeTrue();
+        turn.BlackPlayerTurn.IsKingSide.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Should_Read_White_Move_Separately()
+    {
+        var reader = new AlgebraicNotationReader();
+        var whiteMove = reader.WhiteTurn("e4");
+
+        whiteMove.Colour.Should().Be(PieceColour.White);
+        whiteMove.Moves.Should().HaveCount(1);
+        whiteMove.Moves[0].Piece.Should().Be(PieceType.Pawn);
+        whiteMove.Moves[0].Destination.ToString().Should().Be("E4");
+    }
+
+    [Fact]
+    public void Should_Read_Black_Move_Separately()
+    {
+        var reader = new AlgebraicNotationReader();
+        var blackMove = reader.BlackTurn("e5");
+
+        blackMove.Colour.Should().Be(PieceColour.Black);
+        blackMove.Moves.Should().HaveCount(1);
+        blackMove.Moves[0].Piece.Should().Be(PieceType.Pawn);
+        blackMove.Moves[0].Destination.ToString().Should().Be("E5");
+    }
+
+    [Fact]
+    public void Should_Read_White_Knight_Move_Separately()
+    {
+        var reader = new AlgebraicNotationReader();
+        var whiteMove = reader.WhiteTurn("Nf3");
+
+        whiteMove.Colour.Should().Be(PieceColour.White);
+        whiteMove.Moves[0].Piece.Should().Be(PieceType.Knight);
+        whiteMove.Moves[0].Destination.ToString().Should().Be("F3");
+    }
+
+    [Fact]
+    public void Should_Read_Black_Castling_Separately()
+    {
+        var reader = new AlgebraicNotationReader();
+        var blackMove = reader.BlackTurn("O-O-O");
+
+        blackMove.Colour.Should().Be(PieceColour.Black);
+        blackMove.IsCastling.Should().BeTrue();
+        blackMove.IsKingSide.Should().BeFalse();
+        blackMove.Moves.Should().HaveCount(2);
+        blackMove.Moves[0].Piece.Should().Be(PieceType.King);
+        blackMove.Moves[0].Destination.ToString().Should().Be("C8");
+    }
+
+    [Fact]
+    public void Should_Read_White_Capture_With_Check_Separately()
+    {
+        var reader = new AlgebraicNotationReader();
+        var whiteMove = reader.WhiteTurn("Qxf7+");
+
+        whiteMove.Colour.Should().Be(PieceColour.White);
+        whiteMove.IsCapture.Should().BeTrue();
+        whiteMove.IsCheck.Should().BeTrue();
+        whiteMove.Moves[0].Piece.Should().Be(PieceType.Queen);
+        whiteMove.Moves[0].Destination.ToString().Should().Be("F7");
+    }
+
+    [Fact]
+    public void Should_Read_Black_Promotion_Separately()
+    {
+        var reader = new AlgebraicNotationReader();
+        var blackMove = reader.BlackTurn("d1=Q");
+
+        blackMove.Colour.Should().Be(PieceColour.Black);
+        blackMove.Moves[0].Piece.Should().Be(PieceType.Pawn);
+        blackMove.Moves[0].Destination.ToString().Should().Be("D1");
+        blackMove.Promotion.Should().Be(PieceType.Queen);
+    }
+
+    [Fact]
+    public void Should_Trim_Whitespace_From_Separate_Moves()
+    {
+        var reader = new AlgebraicNotationReader();
+        var whiteMove = reader.WhiteTurn("  e4  ");
+        var blackMove = reader.BlackTurn("  e5  ");
+
+        whiteMove.Moves[0].Destination.ToString().Should().Be("E4");
+        blackMove.Moves[0].Destination.ToString().Should().Be("E5");
+    }
+
+    [Fact]
+    public void Should_Reject_Invalid_White_Move_Notation()
+    {
+        var reader = new AlgebraicNotationReader();
+
+        var act = () => reader.WhiteTurn("invalid");
+
+        act.Should().Throw<AlgebraicNotationException>();
+    }
+
+    [Fact]
+    public void Should_Reject_Invalid_Black_Move_Notation()
+    {
+        var reader = new AlgebraicNotationReader();
+
+        var act = () => reader.BlackTurn("xyz123");
+
+        act.Should().Throw<AlgebraicNotationException>();
+    }
+
+    [Fact]
+    public void Should_Reject_Empty_White_Move()
+    {
+        var reader = new AlgebraicNotationReader();
+
+        var act = () => reader.WhiteTurn("");
+
+        act.Should().Throw<AlgebraicNotationException>();
+    }
+
+    [Fact]
+    public void Should_Reject_Empty_Black_Move()
+    {
+        var reader = new AlgebraicNotationReader();
+
+        var act = () => reader.BlackTurn("   ");
+
+        act.Should().Throw<AlgebraicNotationException>();
+    }
+
+    [Fact]
+    public void Should_Reject_Invalid_Piece_Letter()
+    {
+        var reader = new AlgebraicNotationReader();
+
+        var act = () => reader.WhiteTurn("Xe4");
+
+        act.Should().Throw<AlgebraicNotationException>();
+    }
+
+    [Fact]
+    public void Should_Reject_Invalid_Position_Format()
+    {
+        var reader = new AlgebraicNotationReader();
+
+        var act = () => reader.BlackTurn("e9");
+
+        act.Should().Throw<AlgebraicNotationException>();
+    }
+
+    [Fact]
+    public void Should_Accept_Valid_Move_With_Extra_Symbols()
+    {
+        var reader = new AlgebraicNotationReader();
+
+        var whiteMove = reader.WhiteTurn("Qxf7+");
+        var blackMove = reader.BlackTurn("Nxe4#");
+
+        whiteMove.Moves[0].Destination.ToString().Should().Be("F7");
+        blackMove.Moves[0].Destination.ToString().Should().Be("E4");
     }
 }

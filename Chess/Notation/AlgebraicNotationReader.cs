@@ -12,25 +12,20 @@ internal static class AlgebraicPlayerMoveNotation
     public const string NonPawnMovement = "[KQNBR][1-8a-hA-H]?x?[a-hA-H]x?[1-8]"; // For piece (non-pawn) moves and piece captures
     public const string PawnMovement = "[a-hA-H]x?[a-hA-H]?[1-8](\\=[QRNB])?"; //Pawn moves, captures, and promotions
     private const string MoveTimes = "(\\s*\\d+\\.?\\d+?m?s)?"; // Skip over move-times; it is possible to retain move times if you make this a capturing group
-    private const string PlayerMove = $"{Whitespace}((?:(?:{Castling}?)|(?:{NonPawnMovement})|(?:{PawnMovement}))\\+?#?)"; // Allow plus symbol for checks (attacks on king)
-    public const string FullRound = $"{Whitespace}{MoveNumber}{Period}(?<white>{PlayerMove}{MoveTimes}){Period}(?<black>{PlayerMove}?{MoveTimes})"; // Question mark allows final move to be white side's move without any subsequent black moves
+    internal const string PlayerMove = $"((?:(?:{Castling})|(?:{NonPawnMovement})|(?:{PawnMovement}))\\+?#?)"; // Allow plus symbol for checks (attacks on king)
+    public const string FullRound = $"{Whitespace}(?:{MoveNumber}{Period}{Whitespace})?(?<white>{PlayerMove}{MoveTimes})(?:{Whitespace})(?<black>{PlayerMove}?{MoveTimes})"; // Move number and period are optional; white and black moves are separated by whitespace; question mark allows final move to be white side's move without any subsequent black moves
 }
 
-public sealed class AlgebraicNotationReader
+public sealed partial class AlgebraicNotationReader
 {
-    private static readonly Regex RoundRegex = new (AlgebraicPlayerMoveNotation.FullRound);
-    private static readonly Regex CastlingRegex = new (AlgebraicPlayerMoveNotation.Castling);
-    private static readonly Regex NonPawnMovementRegex = new (AlgebraicPlayerMoveNotation.NonPawnMovement);
-    private static readonly Regex PawnMovementRegex = new (AlgebraicPlayerMoveNotation.PawnMovement);
-    
-    private static readonly char[] CaptureAndCheckChars = new[] { 'x', 'X', '+', '#' };
-    private static readonly char[] CastleChars = new[] { 'O', 'o', '0' };
+    private static readonly char[] CaptureAndCheckChars = ['x', 'X', '+', '#'];
+    private static readonly char[] CastleChars = ['O', 'o', '0'];
 
     private int TurnNumber { get; set; }
 
     public NotedTurn ReadTurn(string chessTurn)
     {
-        var match = RoundRegex.Match(chessTurn);
+        var match = FullRoundRegex().Match(chessTurn);
 
         if (!match.Success)
         {
@@ -51,13 +46,13 @@ public sealed class AlgebraicNotationReader
         var whiteMove = whiteMoveGroup.Success
             ? ReadPlayerTurn(PieceColour.White, whiteMoveGroup.Value)
             : throw AlgebraicNotationException.InvalidWhitePlayerMove;
-        
+
         var blackMoveGroup = match.Groups["black"];
         var blackMove = blackMoveGroup.Success
             ? ReadPlayerTurn(PieceColour.Black, blackMoveGroup.Value)
             : whiteMove.IsCheckmate
                 ? new(PieceColour.Black)
-                : throw AlgebraicNotationException.InvalidBlackPlayerMove; 
+                : throw AlgebraicNotationException.InvalidBlackPlayerMove;
 
         return new()
         {
@@ -67,12 +62,58 @@ public sealed class AlgebraicNotationReader
         };
     }
 
+    /// <summary>
+    /// Reads a white player's move in algebraic notation (e.g., "e4", "Nf3", "O-O")
+    /// </summary>
+    /// <param name="whiteMove">The white player's move in algebraic notation</param>
+    /// <returns>A NotedPlayerTurn representing the white player's move</returns>
+    /// <exception cref="AlgebraicNotationException">Thrown when the move notation is invalid</exception>
+    public NotedPlayerTurn WhiteTurn(string whiteMove)
+    {
+        if (string.IsNullOrWhiteSpace(whiteMove))
+        {
+            throw AlgebraicNotationException.InvalidWhitePlayerMove;
+        }
+
+        var trimmedMove = whiteMove.Trim();
+
+        if (!PlayerMoveRegex().IsMatch(trimmedMove))
+        {
+            throw AlgebraicNotationException.InvalidWhitePlayerMove;
+        }
+
+        return ReadPlayerTurn(PieceColour.White, trimmedMove);
+    }
+
+    /// <summary>
+    /// Reads a black player's move in algebraic notation (e.g., "e5", "Nc6", "O-O-O")
+    /// </summary>
+    /// <param name="blackMove">The black player's move in algebraic notation</param>
+    /// <returns>A NotedPlayerTurn representing the black player's move</returns>
+    /// <exception cref="AlgebraicNotationException">Thrown when the move notation is invalid</exception>
+    public NotedPlayerTurn BlackTurn(string blackMove)
+    {
+        if (string.IsNullOrWhiteSpace(blackMove))
+        {
+            throw AlgebraicNotationException.InvalidBlackPlayerMove;
+        }
+
+        var trimmedMove = blackMove.Trim();
+
+        if (!PlayerMoveRegex().IsMatch(trimmedMove))
+        {
+            throw AlgebraicNotationException.InvalidBlackPlayerMove;
+        }
+
+        return ReadPlayerTurn(PieceColour.Black, trimmedMove);
+    }
+
     private static NotedPlayerTurn ReadPlayerTurn(PieceColour colour, string playerMove)
     {
         var turn = new NotedPlayerTurn(colour)
         {
             IsCapture = playerMove.Contains('x', StringComparison.OrdinalIgnoreCase),
-            IsCastling = CastlingRegex.IsMatch(playerMove),
+            IsCastling = CastlingRegex().IsMatch(playerMove),
             IsCheck = playerMove.Contains('+'),
             IsCheckmate = playerMove.Contains('#')
         };
@@ -80,7 +121,7 @@ public sealed class AlgebraicNotationReader
         if (turn.IsCastling)
         {
             var count = playerMove.Count(c => CastleChars.Contains(c));
-            turn.IsKingSide = count == 2;
+            turn.IsKingSide = count == 2; // 2 O's for kingside (O-O), 3 O's for queenside (O-O-O)
             var isWhite = colour == PieceColour.White;
 
             var y = isWhite ? 1 : 8;
@@ -90,7 +131,7 @@ public sealed class AlgebraicNotationReader
             turn.Moves.Add(new (PieceType.King, new(kingX, y)));
             turn.Moves.Add(new (PieceType.Rook, new(rookX, y)));
         }
-        else if (NonPawnMovementRegex.IsMatch(playerMove))
+        else if (NonPawnMovementRegex().IsMatch(playerMove))
         {
             var piece = (PieceType)playerMove[0];
             var parts = playerMove[1..].Split(CaptureAndCheckChars, StringSplitOptions.RemoveEmptyEntries);
@@ -122,7 +163,7 @@ public sealed class AlgebraicNotationReader
                 Hint = hint.ToUpperInvariant()
             });
         }
-        else if (PawnMovementRegex.IsMatch(playerMove))
+        else if (PawnMovementRegex().IsMatch(playerMove))
         {
             const PieceType piece = PieceType.Pawn;
             NotedPlayerMove movement = !turn.IsCapture
@@ -143,4 +184,19 @@ public sealed class AlgebraicNotationReader
 
         return turn;
     }
+
+    [GeneratedRegex(AlgebraicPlayerMoveNotation.FullRound)]
+    private static partial Regex FullRoundRegex();
+
+    [GeneratedRegex("^" + AlgebraicPlayerMoveNotation.PlayerMove + "$")]
+    private static partial Regex PlayerMoveRegex();
+
+    [GeneratedRegex(AlgebraicPlayerMoveNotation.Castling)]
+    private static partial Regex CastlingRegex();
+
+    [GeneratedRegex(AlgebraicPlayerMoveNotation.NonPawnMovement)]
+    private static partial Regex NonPawnMovementRegex();
+
+    [GeneratedRegex(AlgebraicPlayerMoveNotation.PawnMovement)]
+    private static partial Regex PawnMovementRegex();
 }

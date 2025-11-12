@@ -51,7 +51,11 @@ public readonly struct Position
         }
 
         var uppercaseHint = hint.ToUpperInvariant();
-        return uppercaseHint.Contains(X) ||
+
+        // Check if hint matches this position's file (X) or rank (Y)
+        // For example, hint "B" should match a piece on the B-file (X == 'B')
+        // and hint "3" should match a piece on rank 3 (Y == 3)
+        return uppercaseHint.Contains(X.ToString()) ||
                uppercaseHint.Contains(Y.ToString());
     }
 

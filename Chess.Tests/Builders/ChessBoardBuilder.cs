@@ -36,7 +36,7 @@ public sealed class ChessBoardBuilder
     
     public ChessBoardBuilder SetQueenAt(string tile, PieceColour colour = PieceColour.Black)
     {
-        AddOrRemovePiece(new Pawn(colour, tile[0], int.Parse(tile.Substring(1, 1))));
+        AddOrRemovePiece(new Queen(colour, tile[0], int.Parse(tile.Substring(1, 1))));
         return this;
     }
 
