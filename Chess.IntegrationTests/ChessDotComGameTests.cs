@@ -9,25 +9,25 @@ using Xunit.Abstractions;
 namespace Chess.IntegrationTests;
 
 /// <summary>
-/// Integration tests using real games from Lichess.org
+/// Integration tests using real games from Chess.com
 /// These tests validate that the chess engine can successfully parse and apply
 /// complete games from real matches, ensuring the notation reader and move
 /// application logic work correctly with real-world data.
 /// </summary>
-public class LichessGameTests
+public class ChessDotComGameTests
 {
     private readonly ITestOutputHelper _output;
 
-    public LichessGameTests(ITestOutputHelper output)
+    public ChessDotComGameTests(ITestOutputHelper output)
     {
         _output = output;
     }
 
     [Theory]
-    [InlineData("lichess_game1.txt", "Gvein vs DrNykterstein (Black wins)", 48, 6, 7)]
-    [InlineData("lichess_game2.txt", "WowFlow vs DrNykterstein (Black wins)", 30, 11, 12)]
-    [InlineData("lichess_game3.txt", "DrNykterstein vs Think_Fast_Move_Fast (White wins)", 58, 5, 3)]
-    public void RealLichessGame_ShouldParseAndApplyAllMoves(
+    [InlineData("chesscom_game1.txt", "Gvein vs DrNykterstein (Black wins)", 48, 6, 7)]
+    [InlineData("chesscom_game2.txt", "WowFlow vs DrNykterstein (Black wins)", 30, 11, 12)]
+    [InlineData("chesscom_game3.txt", "DrNykterstein vs Think_Fast_Move_Fast (White wins)", 58, 5, 3)]
+    public void RealChessDotComGame_ShouldParseAndApplyAllMoves(
         string filename,
         string gameName,
         int expectedTurns,
@@ -38,7 +38,7 @@ public class LichessGameTests
         _output.WriteLine($"Testing: {gameName}");
 
         var testDataPath = Path.Combine(
-            Path.GetDirectoryName(typeof(LichessGameTests).Assembly.Location)!,
+            Path.GetDirectoryName(typeof(ChessDotComGameTests).Assembly.Location)!,
             "TestData",
             filename);
 
@@ -119,17 +119,17 @@ public class LichessGameTests
     }
 
     [Fact]
-    public void AllLichessGames_ShouldComplete100Percent()
+    public void AllChessDotComGames_ShouldComplete100Percent()
     {
         // This meta-test verifies that all game files can be fully processed
         var testDataPath = Path.Combine(
-            Path.GetDirectoryName(typeof(LichessGameTests).Assembly.Location)!,
+            Path.GetDirectoryName(typeof(ChessDotComGameTests).Assembly.Location)!,
             "TestData");
 
-        var gameFiles = Directory.GetFiles(testDataPath, "lichess_game*.txt");
+        var gameFiles = Directory.GetFiles(testDataPath, "chesscom_game*.txt");
 
         Assert.NotEmpty(gameFiles);
-        _output.WriteLine($"Found {gameFiles.Length} game files to test");
+        _output.WriteLine($"Found {gameFiles.Length} Chess.com game files to test");
 
         foreach (var gameFile in gameFiles)
         {
@@ -152,8 +152,8 @@ public class LichessGameTests
     {
         var turns = new System.Collections.Generic.List<NotedTurn>();
 
-        // Parse turns in Lichess format: "1. e4 e5" (one turn per line)
-        // The AlgebraicNotationReader now handles this format natively
+        // Parse turns in standard algebraic notation format: "1. e4 e5" (one turn per line)
+        // The AlgebraicNotationReader handles this format natively
         var lines = notation.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
         foreach (var line in lines)
