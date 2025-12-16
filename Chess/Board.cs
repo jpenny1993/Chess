@@ -1,6 +1,9 @@
 ﻿using Chess.Actions;
 using Chess.Notation;
 using Chess.Pieces;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Chess.Tests")]
 
 namespace Chess;
 
@@ -45,9 +48,23 @@ public class Board
     }
 
     /// <summary>
+    /// Applies a single player's turn (move) to the board.
+    /// This allows applying white and black moves independently.
+    /// </summary>
+    /// <param name="playerTurn">The player turn to apply (contains white or black move)</param>
+    public void ApplyPlayerTurn(NotedPlayerTurn playerTurn)
+    {
+        var movement = ConvertNotedPlayerTurnToMovement(playerTurn);
+        if (movement != null)
+        {
+            ApplyMovement(movement);
+        }
+    }
+
+    /// <summary>
     /// Applies a movement to the board, updating piece positions and handling special moves.
     /// </summary>
-    private void ApplyMovement(Movement movement)
+    internal void ApplyMovement(Movement movement)
     {
         var piece = movement.MovingPiece;
 

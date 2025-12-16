@@ -25,6 +25,26 @@ public abstract class Piece
     public bool IsQueen => Type == PieceType.Queen;
     public bool IsRook => Type == PieceType.Rook;
 
+    /// <summary>
+    /// Gets the Unicode chess piece emoji symbol.
+    /// </summary>
+    public string Emoji => (Colour, Type) switch
+    {
+        (PieceColour.White, PieceType.King) => "♔",
+        (PieceColour.White, PieceType.Queen) => "♕",
+        (PieceColour.White, PieceType.Rook) => "♖",
+        (PieceColour.White, PieceType.Bishop) => "♗",
+        (PieceColour.White, PieceType.Knight) => "♘",
+        (PieceColour.White, PieceType.Pawn) => "♙",
+        (PieceColour.Black, PieceType.King) => "♚",
+        (PieceColour.Black, PieceType.Queen) => "♛",
+        (PieceColour.Black, PieceType.Rook) => "♜",
+        (PieceColour.Black, PieceType.Bishop) => "♝",
+        (PieceColour.Black, PieceType.Knight) => "♞",
+        (PieceColour.Black, PieceType.Pawn) => "♟",
+        _ => "?" // output requires Unicode if you see this
+    };
+
     internal Piece(PieceColour colour, PieceType type)
     {
         Position = default;
@@ -285,7 +305,7 @@ public abstract class Piece
         if (intersectingPiece == default)
         {
             // Valid move, the tile is empty
-            return new (piece, Position, step);
+            return new (piece, piece.Position, step);
         }
 
         // Invalid move, can't capture teammates
@@ -295,6 +315,6 @@ public abstract class Piece
         }
 
         // Valid move, can capture enemies
-        return new (piece, Position, step, new Capture(intersectingPiece.Type));
+        return new (piece, piece.Position, step, new Capture(intersectingPiece.Type));
     }
 }
