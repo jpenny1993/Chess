@@ -16,6 +16,7 @@ public class EvaluationWeights
     public int PawnStructure_Opening { get; set; } = 1000;        // 10%
     public int PieceDevelopment_Opening { get; set; } = 2500;     // 25%
     public int KingSafety_Opening { get; set; } = 2000;           // 20%
+    public int SelfPreservation_Opening { get; set; } = 1000;     // 10%
 
     // Middlegame phase weights (moves 12-35)
     // Emphasis: Material and piece activity
@@ -26,6 +27,7 @@ public class EvaluationWeights
     public int PawnStructure_Middlegame { get; set; } = 1500;     // 15%
     public int PieceDevelopment_Middlegame { get; set; } = 500;   // 5%
     public int KingSafety_Middlegame { get; set; } = 2000;        // 20%
+    public int SelfPreservation_Middlegame { get; set; } = 1000;  // 10%
 
     // Endgame phase weights (queens off or material < 26)
     // Emphasis: Pawn structure and king activity
@@ -36,6 +38,7 @@ public class EvaluationWeights
     public int PawnStructure_Endgame { get; set; } = 3000;        // 30%
     public int PieceDevelopment_Endgame { get; set; } = 0;        // 0% (irrelevant)
     public int KingSafety_Endgame { get; set; } = 1500;           // 15% (king activity)
+    public int SelfPreservation_Endgame { get; set; } = 1500;     // 15% (every piece matters)
 
     /// <summary>
     /// Gets weights for a specific game phase.
@@ -52,7 +55,8 @@ public class EvaluationWeights
                 CenterControl = CenterControl_Opening,
                 PawnStructure = PawnStructure_Opening,
                 PieceDevelopment = PieceDevelopment_Opening,
-                KingSafety = KingSafety_Opening
+                KingSafety = KingSafety_Opening,
+                SelfPreservation = SelfPreservation_Opening
             },
             GamePhaseDetector.GamePhase.Middlegame => new PhaseWeights
             {
@@ -62,7 +66,8 @@ public class EvaluationWeights
                 CenterControl = CenterControl_Middlegame,
                 PawnStructure = PawnStructure_Middlegame,
                 PieceDevelopment = PieceDevelopment_Middlegame,
-                KingSafety = KingSafety_Middlegame
+                KingSafety = KingSafety_Middlegame,
+                SelfPreservation = SelfPreservation_Middlegame
             },
             GamePhaseDetector.GamePhase.Endgame => new PhaseWeights
             {
@@ -72,7 +77,8 @@ public class EvaluationWeights
                 CenterControl = CenterControl_Endgame,
                 PawnStructure = PawnStructure_Endgame,
                 PieceDevelopment = PieceDevelopment_Endgame,
-                KingSafety = KingSafety_Endgame
+                KingSafety = KingSafety_Endgame,
+                SelfPreservation = SelfPreservation_Endgame
             },
             _ => throw new ArgumentException($"Unknown game phase: {phase}")
         };
@@ -92,6 +98,7 @@ public class EvaluationWeights
             PawnStructure_Opening = PawnStructure_Opening,
             PieceDevelopment_Opening = PieceDevelopment_Opening,
             KingSafety_Opening = KingSafety_Opening,
+            SelfPreservation_Opening = SelfPreservation_Opening,
             MaterialGain_Middlegame = MaterialGain_Middlegame,
             Checkmate_Middlegame = Checkmate_Middlegame,
             PieceActivity_Middlegame = PieceActivity_Middlegame,
@@ -99,13 +106,15 @@ public class EvaluationWeights
             PawnStructure_Middlegame = PawnStructure_Middlegame,
             PieceDevelopment_Middlegame = PieceDevelopment_Middlegame,
             KingSafety_Middlegame = KingSafety_Middlegame,
+            SelfPreservation_Middlegame = SelfPreservation_Middlegame,
             MaterialGain_Endgame = MaterialGain_Endgame,
             Checkmate_Endgame = Checkmate_Endgame,
             PieceActivity_Endgame = PieceActivity_Endgame,
             CenterControl_Endgame = CenterControl_Endgame,
             PawnStructure_Endgame = PawnStructure_Endgame,
             PieceDevelopment_Endgame = PieceDevelopment_Endgame,
-            KingSafety_Endgame = KingSafety_Endgame
+            KingSafety_Endgame = KingSafety_Endgame,
+            SelfPreservation_Endgame = SelfPreservation_Endgame
         };
     }
 }
@@ -122,13 +131,14 @@ public class PhaseWeights
     public int PawnStructure { get; set; }
     public int PieceDevelopment { get; set; }
     public int KingSafety { get; set; }
+    public int SelfPreservation { get; set; }
 
     /// <summary>
     /// Normalizes weights so they sum to 10000 (100%).
     /// </summary>
     public PhaseWeights Normalize()
     {
-        int total = MaterialGain + Checkmate + PieceActivity + CenterControl + PawnStructure + PieceDevelopment + KingSafety;
+        int total = MaterialGain + Checkmate + PieceActivity + CenterControl + PawnStructure + PieceDevelopment + KingSafety + SelfPreservation;
 
         if (total == 0)
         {
@@ -143,7 +153,8 @@ public class PhaseWeights
             CenterControl = (CenterControl * 10000) / total,
             PawnStructure = (PawnStructure * 10000) / total,
             PieceDevelopment = (PieceDevelopment * 10000) / total,
-            KingSafety = (KingSafety * 10000) / total
+            KingSafety = (KingSafety * 10000) / total,
+            SelfPreservation = (SelfPreservation * 10000) / total
         };
     }
 }

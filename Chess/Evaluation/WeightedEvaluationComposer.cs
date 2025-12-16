@@ -15,6 +15,7 @@ public class WeightedEvaluationComposer
     private readonly PawnStructureStrategy _pawnStructureStrategy = new();
     private readonly PieceDevelopmentStrategy _pieceDevelopmentStrategy = new();
     private readonly KingSafetyStrategy _kingSafetyStrategy = new();
+    private readonly PieceSelfPreservationStrategy _selfPreservationStrategy = new();
 
     private EvaluationWeights _weights;
 
@@ -49,6 +50,7 @@ public class WeightedEvaluationComposer
         int pawnScore = _pawnStructureStrategy.Evaluate(board, movement);
         int developmentScore = _pieceDevelopmentStrategy.Evaluate(board, movement);
         int safetyScore = _kingSafetyStrategy.Evaluate(board, movement);
+        int selfPreservationScore = _selfPreservationStrategy.Evaluate(board, movement);
 
         // Combine with normalized weights
         int totalScore = 0;
@@ -59,6 +61,7 @@ public class WeightedEvaluationComposer
         totalScore += (pawnScore * normalizedWeights.PawnStructure) / 10000;
         totalScore += (developmentScore * normalizedWeights.PieceDevelopment) / 10000;
         totalScore += (safetyScore * normalizedWeights.KingSafety) / 10000;
+        totalScore += (selfPreservationScore * normalizedWeights.SelfPreservation) / 10000;
 
         return totalScore;
     }
